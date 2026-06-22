@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java 11 OCP - Luyện Đề</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      color: #1c1d1f;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #6a6f73; font-size: 1rem; }
+    .reset-all-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1.2rem;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .reset-all-btn:hover { background: #c0392b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.4rem 1.6rem;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: block;
+      border-left: 5px solid #b4690e;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.13); }
+    .card h2 { font-size: 1.05rem; color: #1c1d1f; margin-bottom: 0.4rem; }
+    .card .meta { font-size: 0.82rem; color: #6a6f73; margin-bottom: 0.8rem; }
+    .progress-bar-wrap {
+      background: #e9ecef;
+      border-radius: 20px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 20px;
+      background: #2ecc71;
+      transition: width 0.4s;
+    }
+    .progress-text { font-size: 0.78rem; color: #6a6f73; }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+    .badge-new { background: #d4edda; color: #155724; }
+    .badge-done { background: #cce5ff; color: #004085; }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: #adb5bd;
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>☕ Java 11 OCP – Luyện Đề</h1>
+      <p>Tiến trình được lưu tự động vào trình duyệt. Đổi máy hoặc dùng GitHub Pages vẫn giữ được nếu dùng cùng trình duyệt.</p>
+      <button class="reset-all-btn" onclick="resetAll()">🗑 Xóa toàn bộ tiến trình</button>
+    </header>
+    <div class="grid" id="grid"></div>
+    <footer>Hosted on GitHub Pages · Dữ liệu lưu tại localStorage trình duyệt</footer>
+  </div>
+
+  <script>
+    const exams = [
+      { file: "001 Exam 1.html",   label: "Exam 1",    key: "exam_001" },
+      { file: "001 Exam 1_2.html", label: "Exam 1 – Part 2", key: "exam_001_2" },
+      { file: "002 Exam 2.html",   label: "Exam 2",    key: "exam_002" },
+      { file: "002 Exam 2_2.html", label: "Exam 2 – Part 2", key: "exam_002_2" },
+      { file: "003 Exam 3.html",   label: "Exam 3",    key: "exam_003" },
+      { file: "003 Exam 3_2.html", label: "Exam 3 – Part 2", key: "exam_003_2" },
+      { file: "004 Exam 4.html",   label: "Exam 4",    key: "exam_004" },
+      { file: "004 Exam 4_2.html", label: "Exam 4 – Part 2", key: "exam_004_2" },
+      { file: "005 Exam 5.html",   label: "Exam 5",    key: "exam_005" },
+      { file: "005 Exam 5_2.html", label: "Exam 5 – Part 2", key: "exam_005_2" },
+      { file: "006 Exam 6.html",   label: "Exam 6",    key: "exam_006" },
+      { file: "006 Exam 6_2.html", label: "Exam 6 – Part 2", key: "exam_006_2" },
+    ];
+
+    function getProgress(key) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key) || '{}');
+        const submitted = Object.keys(data.submitted || {}).length;
+        const correct = data.correct || 0;
+        const total = data.total || 0;
+        return { submitted, correct, total };
+      } catch(e) { return { submitted: 0, correct: 0, total: 0 }; }
+    }
+
+    function render() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      exams.forEach(exam => {
+        const { submitted, correct, total } = getProgress(exam.key);
+        const pct = total > 0 ? Math.round((submitted / total) * 100) : 0;
+        const badge = submitted === 0
+          ? '<span class="badge badge-new">Chưa làm</span>'
+          : submitted === total && total > 0
+            ? '<span class="badge badge-done">Hoàn thành</span>'
+            : '';
+        const scoreText = total > 0 && submitted > 0
+          ? `Đã làm: ${submitted}/${total} câu · Đúng: ${correct}`
+          : total > 0 ? `${total} câu · Chưa bắt đầu` : 'Đang tải...';
+
+        const card = document.createElement('a');
+        card.className = 'card';
+        card.href = encodeURIComponent(exam.file);
+        card.innerHTML = `
+          <h2>${exam.label}${badge}</h2>
+          <div class="meta">${scoreText}</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="progress-text">${pct}% hoàn thành</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function resetAll() {
+      if (!confirm('Bạn có chắc muốn xóa toàn bộ tiến trình?')) return;
+      exams.forEach(e => localStorage.removeItem(e.key));
+      render();
+    }
+
+    render();
+    // Re-render every 2s to pick up changes from exam tabs
+    setInterval(render, 2000);
+  </script>
+</body>
+</html>
+
